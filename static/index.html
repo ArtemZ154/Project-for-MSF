@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <title>Document</title>
+</head>
+<body>
+    <button class="enter_login">enter login</button>
+    <button class="enter_reg">enter registration</button>
+</body>
+</html>
+<script>
+    $('.enter_login').click(function(){  
+        $.ajax({ 
+            url: '/login_s',
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                login: 'ArtemZ54', 
+                password: 'asdf4sd16',
+            },
+            success: function(data){
+                console.log(data);
+            } 
+        })
+    });  
+    $('.enter_reg').click(function(){  
+        $.ajax({ 
+            url: '/registration_s',
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                login: 'ArtemZ167', 
+                password: 'qq31101982Q',
+                e_mail: 'ArtemZ154@yandex.ru',
+                phone: '89138946265',
+                name_surname: 'Artem Zimin',
+            },
+            success: function(data){
+                console.log(data);
+            } 
+        })
+    }); 
+</script>
