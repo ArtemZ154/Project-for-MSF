@@ -1,0 +1,150 @@
++<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <title>Document</title>
+</head>
+<body>
+    <button class="enter_login">enter login</button>
+    <button class="enter_reg">enter registration</button>
+    <button class="create_post">create post</button>
+    <button class="download_post">download post</button>
+    <button class="like_post">like post</button>
+    <button class="change_password">change password</button>
+    <button class="exit_account">exit</button>
+</body>
+</html>
+<script>
+    function getTimeZone() {
+        var offset = new Date().getTimezoneOffset(), o = Math.abs(offset);
+        return (offset < 0 ? "+" : "-") + ("00" + Math.floor(o / 60)).slice(-2) + ":" + ("00" + (o % 60)).slice(-2);
+    }
+    function check_session() {
+        $.ajax({
+            url: '/check_ses',
+            type: 'POST', 
+            dataType: 'text',
+            success: function (data) {
+                return data;
+            }
+        });
+    }
+    $('.enter_login').click(function(){  
+        $.ajax({ 
+            url: '/login_s',
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                login: 'ArtemZ54', 
+                password: '12042006',
+            },
+            success: function(data){
+                console.log(data);
+            } 
+        })
+    });  
+
+    $('.exit_account').click(function() {
+        $.ajax({
+            url: '/exit_account',
+            type: 'POST',
+            dataType: 'text',
+            success: function(data){
+                console.log(data)
+            }
+        })
+    });
+
+    $('.change_password').click(function() {
+        if (check_session() == true) {
+            $.ajax({
+                url: '/change_password',
+                type: 'POST',
+                dataType: 'text',
+                data: {
+                    password: 'asdf4sd16',
+                    password_new: '12042006'
+                }
+            });
+        } else {
+            console.log('LOGIIIIIN!!!');
+        };
+    });
+    
+    $('.create_post').click(function(){
+        if (check_session() == true) {
+            $.ajax({ 
+                url: '/create_post_s',
+                type: 'POST',
+                dataType: 'text',
+                data: {
+                    login: 'ArtemZ54', 
+                    text_post: 'Hello, World!',
+                    photo_post: '123.png',
+                    time_zone: getTimeZone()
+                },
+                success: function(data){
+                    console.log(data);
+                } 
+            })
+        } else {
+            console.log('LOGIIIIN!!!')
+        }
+    });  
+    $('.enter_reg').click(function(){  
+        $.ajax({ 
+            url: '/registration_s',
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                login: 'ArtemZ167', 
+                password: 'qq31101982Q',
+                e_mail: 'ArtemZ154@yandex.ru',
+                phone: '89138946265',
+                name_surname: 'Artem Zimin',
+            },
+            success: function(data){
+                console.log(data);
+            },
+        })
+    });
+    $('.download_post').click(function(){
+        if (check_session() == true) {
+            $.ajax({
+                url: '/load_post_s',
+                type: 'POST',
+                dataType: 'text',
+                data: {
+                    number_post: '123'
+                },
+                success: function(data) {
+                    console.log(data);
+                },
+            });
+        } else {
+            console.log('LOGIIIIN!!!');
+        }
+    });
+    $('.like_post').click(function(){
+        if (check_session() == true) {
+            $.ajax({
+                url: '/load_like_post',
+                type: 'POST',
+                dataType: 'text',
+                data: {
+                    like_from: 'ArtemZ154',
+                    number_post: '123'
+                },
+                success: function(data) {
+                    console.log(data)
+                },
+            });
+        } else {
+            console.log('LOGIIIN!!!');
+        }
+    })
+
+</script>
