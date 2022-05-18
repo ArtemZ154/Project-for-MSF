@@ -68,8 +68,9 @@ async function getdata (typeq, dataq) {
         check_reg: `SELECT * FROM man WHERE login = "${dataq.login}"`,
         change_pass: `UPDATE man SET password = "${dataq.password_new}" WHERE login = "${dataq.login}" AND password = "${dataq.password}"`,
         check_log: `SELECT * FROM man WHERE login = "${dataq.login}" AND password = "${dataq.password}"`,
-        l_r_photo: `SELECT photo_post FROM post ORDER BY RAND() LIMIT 24`,
+        l_r_photo: `SELECT photo_post FROM post ORDER BY RANDOM() LIMIT 25`,
         acc_log: `SELECT login, name_surname, avatar FROM man WHERE login = "${dataq.login}"`,
+        personal_post: `SELECT photo_post FROM post WHERE login = "${dataq.login}" LIMIT 40`
     };
     
     if (typeq == 'add_profile') {
@@ -78,6 +79,28 @@ async function getdata (typeq, dataq) {
                 if (err) {
                     console.log(err.message)
                 };
+            });
+        });
+        return prom;
+    } else if (typeq == 'l_r_photo'){
+        let prom = new Promise (function (res, rej) {
+            bd.all(all_types[typeq], function(err, rows) {
+                if (err) {
+                    rej(err.message)
+                } else {
+                    res(rows)
+                }
+            });
+        });
+        return prom
+    } else if (typeq == 'personal_post') {
+        let prom = new Promise (function(res, rej) {
+            bd.all(all_types[typeq], function(err, rows) {
+                if (err) {
+                    rej(err.message);
+                } else {
+                    res(rows);
+                }
             });
         });
         return prom;
@@ -172,33 +195,50 @@ async function getdata (typeq, dataq) {
 app.post('/login_s', urlencodedParser, function(req, res) {
     login = req.body.login;
     password = req.body.password;
-    indata = {
+    let indata = {
         login: login, 
         password: password
     };
-    getdata('check_log', indata).then(function(data) {
-        if (data == true) {
-            req.session["user"] = login;
-            req.session["login"] = abc123(100);
-            res.redirect("../");
-        } else {
-            console.log()
-        };            
-    });
-
+    if (req.session["user"].length == 0 || req.session["user"] == undefined) {
+        getdata('check_log', indata).then(function(data) {
+            if (data == true) {
+                req.session["user"] = login;
+                req.session["login"] = abc123(100);
+                res.send(true)
+            } else {
+                res.send(false)
+            };            
+        });
+    } else {
+        res.send('log_true')
+    };
 });
 
 app.post("/log_reg_photo", urlencodedParser, function (req, res) {
-    getdata('l_r_photo').then(function(data){
-        console.log(data)
+    getdata('l_r_photo', {}).then(function(data){
+        let data_o = {};
+        for (i = 0; i < 4; i++) {
+            a = []
+            for (j = 0; j < 6; j++) {
+                if (data.length == 0 || j == 6) {
+                    break
+                } else {
+                    f = '/post/' + data[0].photo_post;
+                    a.unshift(f)
+                    data.splice(0, 1)
+                };
+            }
+            data_o[i + 1] = a;
+        };
+        res.send(data_o);
     })
 });
 
 app.post("/check_ses", urlencodedParser, function (req, res) {
     if (req.session.login == undefined) {
-        return false
+        res.send(false)
     } else {
-        return true
+        res.send(true)
     }
 });
 
@@ -208,7 +248,7 @@ app.post("/registration_s", urlencodedParser, function (req, res) {
     e_mail = req.body.e_mail;
     phone = req.body.phone;
     name_surname = req.body.name_surname;
-    indata = {
+    let indata = {
         login: login,
         password: password,
         e_mail: e_mail,
@@ -221,7 +261,7 @@ app.post("/registration_s", urlencodedParser, function (req, res) {
 });
 
 app.post("/check_reg_s", urlencodedParser, function (req, res) {
-    indata = {
+    let indata = {
         login: req.body.login,
     };
     getdata('check_reg', indata).then(function(data){
@@ -230,7 +270,7 @@ app.post("/check_reg_s", urlencodedParser, function (req, res) {
 });
 
 app.post('/change_password', urlencodedParser, function(req, res) {
-    indata = {
+    let indata = {
         login: req.session.user,
         password: req.body.password,
         password_new: req.body.password_new
@@ -261,7 +301,7 @@ app.post('/create_post_s', urlencodedParser, function (req, res) {
     } else {
         date = calcTime(timezone*2)
     };
-    indata = {
+    let indata = {
         number_post: number_post,
         text_post: text_post,
         photo_post: photo_post,
@@ -274,7 +314,7 @@ app.post('/create_post_s', urlencodedParser, function (req, res) {
 });
 
 app.post('/load_like_post', urlencodedParser, function(req, res) {
-    indata = {
+    let indata = {
         like_from: req.session['user'],
         number_post: req.body.number_post,
         id_like: abc123(50)
@@ -291,7 +331,7 @@ app.post('/load_post_s', urlencodedParser, function(req, res) {
         photo_: '',
         text_: '',
     };
-    indata = {
+    let indata = {
         number_post: req.body.number_post
     };
     getdata('load_post', indata).then(function(data) {
@@ -301,14 +341,22 @@ app.post('/load_post_s', urlencodedParser, function(req, res) {
     });
 });
 
-
-
-app.get("/registration", function (req, res) {
-    res.sendFile('templates/registration.html', {root: __dirname });
+app.post('/personal_page_post', urlencodedParser, function(req, res) {
+    let indata = {
+        login: req.session['user']
+    };
+    getdata('personal_post', indata).then(function(data) {
+        console.log(data);
+        res.send(data)
+    });
 });
 
-app.get("/login", function(req, res ) {
-    res.sendFile('templates/login.html', {root: __dirname })
+app.get("/registration", function (req, res) {
+    res.sendFile('templates/registration123.html', {root: __dirname });
+});
+
+app.get("/login", function(req, res) {
+    res.sendFile('templates/login123.html', {root: __dirname })
 });
 
 app.get("/account/:login", function (req, res) {
@@ -327,3 +375,4 @@ app.get("/account/:login", function (req, res) {
 app.listen(port=8000, function () {
     console.log('Сервер запущен...');
 });
+

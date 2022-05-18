@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/style/styles.css">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <h1>LOGO</h1>
+        </div>
+    </header>
+    <div class="background_registration_line_black"></div>
+    <main>
+        <div class="background_registration_main">
+            <div class="background_registration_line" id="background_registration_img1" >
+                <img v-for="user in users" :src="user" alt="">
+            </div>
+            <div class="background_registration_line" id="background_registration_img2" >
+                <img v-for="user in users" :src="user" alt="">
+            </div>
+            <div class="background_registration_line" id="background_registration_img3" >
+                <img v-for="user in users" :src="user" alt="">
+            </div>
+            <div class="background_registration_line" id="background_registration_img4" >
+                <img v-for="user in users" :src="user" alt="">
+            </div>
+            </div>
+        </div>
+        <div class="form_registr">
+            <div class="form_registr_logo">
+                <h1>LOGO</h1>
+            </div>
+            <div class="form_registr_input">
+                <div class="form_registr_input_mobile">
+                    <div class="logo_img"><img src="img/icon/telephone-handle-silhouette 1.png" alt=""></div>
+                    <input type="text" placeholder="Mobile number" class='mob_in'>
+                </div>
+                <div class="form_registr_input_email">
+                    <div><img src="img/icon/mail 1.png" alt=""></div>
+                    <input type="text" placeholder="Email" class='email_in'>
+                </div>
+                <div class="form_registr_input_surname">
+                    <input type="text" placeholder="Name and surname" class='surname_in'>
+                </div>
+                <div class="form_registr_input_username">
+                    <div><img src="img/icon/user 1.png" alt=""></div>
+                    <input type="text" placeholder="Login" class='username_in'>
+                </div>
+                <div class="form_registr_input_password">
+                    <div><img src="img/icon/Vector (3).png" alt=""></div>   
+                    <input type="text" placeholder="Password" class='password_in'>
+                </div>
+                <div class="button_sens">
+                    <button class="sign_up">Sign up</button>
+                    <div class="logo_social">
+                        <div>
+                            <a
+                                href="https://accounts.google.com/AddSession/identifier?hl=ru&continue=https%3A%2F%2Fwww.google.ru%2F&ec=GAlAmgQ&flowName=GlifWebSignIn&flowEntry=AddSession">
+                                <img src="img/icon/icons8-google-2 1.png" alt="" class="logo_google">
+                            </a>
+                        </div>
+                        <div><a href=""><img src="img/icon/Group 22.png" alt="" class="logo_facebook"></a></div>
+                        <div style="padding-right: 0px;"><a href="https://vk.com/"><img
+                                    src="img/icon/Group 21.png" alt="" class="logo_vk"></a></div>
+                    </div>
+                </div>
+                <div class="login">
+                    <p>Already have an account? <a href="/login" style="text-decoration: none;">Log in</a></p>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+<script>
+    $.ajax({
+        url: '/check_ses',
+        type: 'POST', 
+        dataType: 'text',
+        success: function (data) {
+            console.log(data)
+            if (data == 'true') {
+                location.href = '/'
+            }
+        }
+    });
+
+    $.ajax({
+        url: '/log_reg_photo',
+        type: 'POST',
+        dataType: 'json',
+        data: {},
+        success: function(data){
+            photo(data);
+        }
+    });
+    
+    function photo(data) {
+        a = data[1];
+        b = data[2];
+        c = data[3];
+        d = data[4];
+        let background_registration_img1 = new Vue({
+            el: "#background_registration_img1",
+            data: {
+                users: a
+            },
+        });
+        let background_registration_img2 = new Vue({
+            el: "#background_registration_img2",
+            data: {
+                users: b
+            },
+        });
+        let background_registration_img3 = new Vue({
+            el: "#background_registration_img3",
+            data: {
+                users: c
+            },
+        });
+        let background_registration_img4 = new Vue({
+            el: "#background_registration_img4",
+            data: {
+                users: d
+            },
+        });
+    };
+    $('.sign_up').click(function() {
+        $.ajax({
+            url: '/registration_s',
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                login: $('.username_in').val(), 
+                password: $('.password_in').val(),
+                e_mail: $('.email_in').val(),
+                phone: $('.mob_in').val(),
+                name_surname: $('.surname_in').val(),
+            },
+            success: function(data){
+                console.log(data);
+            }
+        })
+    });
+</script>

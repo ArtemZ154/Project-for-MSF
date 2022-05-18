@@ -16,6 +16,11 @@ header {
     margin-bottom: 15px;
 }
 
+.logup {
+    z-index: 10000;
+    cursor: pointer
+}
+
 .logo {
     width: 210px;
     height: 50px;
@@ -61,9 +66,9 @@ header {
 .form_registr {
     position: absolute;
     width: 450px;
-    height: 501px;
+    height: 382px;
     right: 390px;
-    top: 149px;
+    top: 276px;
     background: #FFFFFF;
     border-radius: 25px;
     box-shadow: 20px 20px 50px 30px rgba(0, 0, 0, 0.65);
@@ -78,13 +83,8 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 45px;
+    margin-top: 60px;
     margin-bottom: 35px;
-}
-
-.sign_in {
-    z-index: 10000;
-    cursor: pointer;
 }
 
 .form_registr_logo h1 {
@@ -97,7 +97,8 @@ header {
 
 .form_registr_input {
     width: 300px;
-    height: 260px;
+    height: 190px;
+    margin-top: 0px;
     margin: 0 auto;
 }
 
