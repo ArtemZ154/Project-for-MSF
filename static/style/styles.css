@@ -1,10 +1,10 @@
 @font-face {
 	font-family: 'Montserrat'; 
-	src: url(/font-family/Montserrat-Light.ttf); 
+	src: url(/static/font-family/Montserrat-Light.ttf); 
 }
 @font-face {
 	font-family: 'Montserrat_Black'; 
-	src: url(/font-family/Montserrat-Bold.ttf); 
+	src: url(/static/font-family/Montserrat-Bold.ttf); 
 }
 
 body {
@@ -80,11 +80,6 @@ header {
     justify-content: center;
     margin-top: 45px;
     margin-bottom: 35px;
-}
-
-.sign_in {
-    z-index: 10000;
-    cursor: pointer;
 }
 
 .form_registr_logo h1 {

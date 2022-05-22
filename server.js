@@ -53,6 +53,52 @@ function calcTime(offset) {
     return nd.toLocaleString();
 };
 
+async function post_for_lenta(len_data, a) {
+    data1 = {
+
+    };
+    a = a.join('","');
+    let indata = {
+        login: '("' + a + '")'
+    };
+    let prom = await new Promise(function(res, rej) {
+        getdata('all_post_user', indata).then(function(dataa) {
+            res(dataa)
+        });  
+    });
+    data1[0] = prom
+    let count = 0;
+    for (let key in data1) {
+        count++
+    };
+    for (let i = 0; i < count; i++) {
+        for (let j = 0; j < data1[i].length; j++) {
+            let indata = {
+                number_post: data1[i]['number_post'],
+            };
+            let prom = await new Promise (function(res, rej) {
+                getdata('check_all_like_post', indata).then(function(dataa) {
+                    res(dataa)
+                });  
+            });
+            fs = data1[i][j]['photo_post'];
+            data1[i][j]['photo_post'] = '/post/' + fs
+            data1[String(i)][j]['like_post'] = prom[0]['COUNT(*)']
+            indata = {
+                login: data1[i][j]['login'],
+            };
+            prom = await new Promise(function(res, rej) {
+                getdata('sel_ava', indata).then(function(dataa) {
+                    res(dataa);
+                });
+            });
+            fs = '/avatar/' + prom[0]['avatar']
+            data1[String(i)][j]['avatar'] = fs;
+        };
+    };
+    return data1;
+};
+
 async function getdata (typeq, dataq) {
     let bd = new sqlite3.Database('instagram.db');
     all_types = {
@@ -70,18 +116,97 @@ async function getdata (typeq, dataq) {
         check_log: `SELECT * FROM man WHERE login = "${dataq.login}" AND password = "${dataq.password}"`,
         l_r_photo: `SELECT photo_post FROM post ORDER BY RANDOM() LIMIT 25`,
         acc_log: `SELECT login, name_surname, avatar FROM man WHERE login = "${dataq.login}"`,
-        personal_post: `SELECT photo_post FROM post WHERE login = "${dataq.login}" LIMIT 40`
+        personal_post: `SELECT photo_post FROM post WHERE login = "${dataq.login}"`,
+        subscribe_bd: 'INSERT INTO subscribers (sub_id, from_sub, to_sub) VALUES (?, ?, ?)',
+        subscribe_check: `SELECT * FROM subscribers WHERE from_sub = "${dataq.from_sub}" AND to_sub = "${dataq.to_sub}"`,
+        subscribe_del: `DELETE FROM subscribers WHERE from_sub = "${dataq.from_sub}" AND to_sub = "${dataq.to_sub}"`,
+        all_sub_user: `SELECT to_sub FROM subscribers WHERE from_sub = "${dataq.user_p}"`,
+        all_post_user: `SELECT * FROM post WHERE login IN ${dataq.login}`,
+        check_all_like_post: `SELECT COUNT(*) FROM like WHERE number_post = "${dataq.number_post}"`,
+        sel_ava: `SELECT avatar FROM man WHERE login = "${dataq.login}"`
     };
     
     if (typeq == 'add_profile') {
         let prom = new Promise (function (res, rej) {
             bd.run(all_types[typeq], [dataq.login, dataq.password, dataq.e_mail, dataq.phone, dataq.name_surname], function (err) {
                 if (err) {
-                    console.log(err.message)
+                    console.log(err.message);
                 };
             });
         });
         return prom;
+    } else if (typeq == 'check_all_like_post') {
+        let prom = new Promise (function(res, rej) {
+            bd.all(all_types[typeq], function(err, rows) {
+                if (err) {
+                    console.log(err)
+                    rej(err);
+                } else {
+                    res(rows);
+                };
+            });
+        }); 
+        return prom;
+    } else if (typeq == 'sel_ava') {
+        let prom = new Promise (function(res, rej) {
+            bd.all(all_types[typeq], function(err, rows) {
+                if (err) {
+                    console.log(err)
+                    rej(err);
+                } else {
+                    res(rows);
+                };
+            });
+        }); 
+        return prom;
+    } else if (typeq == 'all_sub_user') {
+        let prom = new Promise (function(res, rej) {
+            bd.all(all_types['all_sub_user'], function(err, rows) {
+                if (err) {
+                    console.log(err)
+                    rej(err);
+                } else {
+                    res(rows);
+                };
+            });
+        }); 
+        return prom;
+    } else if (typeq == 'all_post_user') {
+        let prom = new Promise (function(res, rej) {
+            bd.all(all_types['all_post_user'], function(err, rows) {
+                if (err) {
+                    console.log(err)
+                    rej(err);
+                } else {
+                    res(rows);
+                };
+            });
+        }); 
+        return prom;
+    } else if (typeq == 'subscribe_bd') {
+        let prom = new Promise(function(res, rej) {
+            bd.all(all_types['subscribe_check'], function(err, rows) {
+                if (rows.length == 0) {
+                    let prom_d = new Promise(function(res, rej) {
+                        bd.run(all_types['subscribe_bd'], [dataq.sub_id, dataq.from_sub, dataq.to_sub], function (err) {
+                            if (err) {
+                                console.log(err);
+                            };
+                        });
+                    });
+                } else {
+                    let prom_d = new Promise (function (res, rej) {
+                        bd.run(all_types['subscribe_del'], function (err) {
+                            if (err) {
+                                console.log(err);
+                            };
+                        });
+                    });
+                }
+
+            })
+        });
+        return prom 
     } else if (typeq == 'l_r_photo'){
         let prom = new Promise (function (res, rej) {
             bd.all(all_types[typeq], function(err, rows) {
@@ -199,7 +324,8 @@ app.post('/login_s', urlencodedParser, function(req, res) {
         login: login, 
         password: password
     };
-    if (req.session["user"].length == 0 || req.session["user"] == undefined) {
+    console.log(req.session["user"])
+    if (req.session["user"] == undefined) {
         getdata('check_log', indata).then(function(data) {
             if (data == true) {
                 req.session["user"] = login;
@@ -213,6 +339,34 @@ app.post('/login_s', urlencodedParser, function(req, res) {
         res.send('log_true')
     };
 });
+
+app.post('/lenta_sub', urlencodedParser, function(req, res) {
+    let indata = {
+        user_p: req.session['user'],
+    };
+    getdata('all_sub_user', indata).then(function(data){
+        len_data = data.length
+        let a = []
+        for (let i = 0; i < data.length; i++) {
+            b = data[i]['to_sub'];
+            a.push(b);
+        }; 
+        post_for_lenta(len_data, a).then(function(data) {
+            res.send(data);
+        });
+    });
+});
+
+app.post('/subscribator', urlencodedParser, function(req, res) {
+    let indata = {
+        from_sub: req.session['user'],
+        to_sub: req.body.to_sub,
+        sub_id: abc123(50)
+    }
+    getdata('subscribe_bd', indata).then(function(data) {
+        console.log(data)
+    })
+})
 
 app.post("/log_reg_photo", urlencodedParser, function (req, res) {
     getdata('l_r_photo', {}).then(function(data){
@@ -351,6 +505,8 @@ app.post('/personal_page_post', urlencodedParser, function(req, res) {
     });
 });
 
+
+
 app.get("/registration", function (req, res) {
     res.sendFile('templates/registration123.html', {root: __dirname });
 });
@@ -370,9 +526,16 @@ app.get("/account/:login", function (req, res) {
     })
 });
 
+app.get('/', function (req, res) {
+    res.sendFile('templates/main.html', {root: __dirname })
+});
+
+app.get("/test", function(req, res) {
+    res.sendFile('templates/test.html', {root: __dirname })
+});
+
 
 
 app.listen(port=8000, function () {
     console.log('Сервер запущен...');
 });
-

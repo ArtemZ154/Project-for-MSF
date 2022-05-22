@@ -76,7 +76,6 @@
         type: 'POST', 
         dataType: 'text',
         success: function (data) {
-            console.log(data)
             if (data == 'true') {
                 location.href = '/'
             }
@@ -105,8 +104,10 @@
             success: function(data){
                 console.log(data);
                 if (data == 'log_true') {
-                    location.href = "127.0.0.1:8000/";
-                };
+                    location.href = "/";
+                } if (data == 'true') {
+                    location.href = "/";
+                }
             }
         })
     });
