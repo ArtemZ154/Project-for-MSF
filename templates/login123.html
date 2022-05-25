@@ -20,7 +20,7 @@
     </header>
     <div class="background_registration_line_black"></div>
     <main>
-        <div class="background_registration_main">
+        <div class="background_registration_main" >
             <div class="background_registration_line" id="background_registration_img1" >
                 <img v-for="user in users" :src="user" alt="">
             </div>
@@ -88,6 +88,7 @@
         dataType: 'json',
         data: {},
         success: function(data){
+            console.log(data)
             photo(data);
         }
     });

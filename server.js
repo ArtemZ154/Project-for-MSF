@@ -1,11 +1,23 @@
 const express = require("express");
 const session  = require("express-session");
 const sqlite3 = require("sqlite3");
-const app = express();
+const app = express()
+    bodyParser = require("body-parser");
+    port = 3080;
 const urlencodedParser = express.urlencoded({extended: false});
 const redisStorage = require('connect-redis')(session);
 const redis = require('redis');
+const cors = require('cors');
 const { urlencoded } = require("express");
+
+const corsOptions ={
+    origin:'*',
+    credentials:true,
+    optionSuccessStatus:200
+ }
+ 
+ app.use(cors(corsOptions))
+
 const client = redis.createClient({
     legacyMode: true,
     host: 'localhost',
@@ -22,6 +34,7 @@ client.on('connect', function (err) {
 
 let data = new Date()
 
+app.use(bodyParser.json());
 app.use(express.static(__dirname + '/static'));
 app.use(express.static(__dirname + '/templates'));
 app.use(express.static(__dirname + '/post_photo'));
@@ -249,7 +262,6 @@ async function getdata (typeq, dataq) {
             });
         })
     } else if (typeq == 'change_pass') {
-        console.log(dataq)
         let prom = new Promise (function(res, rej) {
             bd.run(all_types[typeq], function(err) {
                 if (err) {
@@ -324,7 +336,6 @@ app.post('/login_s', urlencodedParser, function(req, res) {
         login: login, 
         password: password
     };
-    console.log(req.session["user"])
     if (req.session["user"] == undefined) {
         getdata('check_log', indata).then(function(data) {
             if (data == true) {
@@ -364,7 +375,7 @@ app.post('/subscribator', urlencodedParser, function(req, res) {
         sub_id: abc123(50)
     }
     getdata('subscribe_bd', indata).then(function(data) {
-        console.log(data)
+        res.send()
     })
 })
 
@@ -377,7 +388,7 @@ app.post("/log_reg_photo", urlencodedParser, function (req, res) {
                 if (data.length == 0 || j == 6) {
                     break
                 } else {
-                    f = '/post/' + data[0].photo_post;
+                    f = 'http://127.0.0.1:8000/post/' + data[0].photo_post;
                     a.unshift(f)
                     data.splice(0, 1)
                 };

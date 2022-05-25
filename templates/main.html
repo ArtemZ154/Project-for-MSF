@@ -30,47 +30,49 @@
         </div>
     </header>
     <main>
-        <div class="all_card" v-for="(item, index) in datas">
-            <div class="card" v-for="item in item">
-                <div class="left_bar">
-                    <img :src="item.photo_post" alt="" class="img_card">
-                </div>
-                <div class="right_bar">
-                    <div class="nav_card">
-                        <div class="left_button">
-                            <div class="like"><a href=""><img src="/img/main/iconcard/like (1) 1.png" alt=""></a>
-                                <p style="position:relative; display: block;">{{ item.like_post }}</p>
+        <div>
+            <div class="all_card" v-for="(item, index) in datas">
+                <div class="card" v-for="item in item">
+                    <div class="left_bar">
+                        <img :src="item.photo_post" alt="" class="img_card">
+                    </div>
+                    <div class="right_bar" :class="item.number_post">
+                        <div class="nav_card">
+                            <div class="left_button">
+                                <div class="like"><a class="like_abc"><img src="/img/main/iconcard/like (1) 1.png" alt=""></a>
+                                    <p style="position:relative; display: block;">{{ item.like_post }}</p>
+                                </div>
+                                <a href=""><img src="/img/main/iconcard/chat 1.png" alt=""></a>
+                                <a href=""><img src="/img/main/iconcard/share 1.png" alt=""></a>
                             </div>
-                            <a href=""><img src="/img/main/iconcard/chat 1.png" alt=""></a>
-                            <a href=""><img src="/img/main/iconcard/share 1.png" alt=""></a>
-                        </div>
-                        <div class="right_button">
-                            <button>Save</button>
-                        </div>
-                    </div>
-                    <div class="account">
-                        <img :src="item.avatar" alt="" class="personone">
-                        <p>{{ item.login }}</p>
-                        <a href=""><img src="/img/main/iconcard/arrow-down-sign-to-navigate 1.png" alt=""
-                                srcset=""></a>
-                    </div>
-                    <div class="account_me_comment">
-                        <p>{{ item.text_post }}</p>
-                    </div>
-                    <div class="comment">
-                        <div class="comment_p">
-                            <p>Comments:</p>
-                        </div>
-                        <div class="manyperson">
-                            <div class="person">
-                                <img src="/img/main/15746993c3ca3f4a79f2960819de2c37 1.png" alt="">
-                                <p style="font-family: 'Montserrat_Black';">hoyleo166:</p>
-                                <p style="font-family: 'Montserrat';">Love it!</p>
+                            <div class="right_button">
+                                <button>Save</button>
                             </div>
                         </div>
-                        <div class="new_comment">
-                            <img src="/img/main/Group 42.png" alt="">
-                            <input type="text" placeholder="Add a comment">
+                        <div class="account">
+                            <img :src="item.avatar" alt="" class="personone">
+                            <p>{{ item.login }}</p>
+                            <a href=""><img src="/img/main/iconcard/arrow-down-sign-to-navigate 1.png" alt=""
+                                    srcset=""></a>
+                        </div>
+                        <div class="account_me_comment">
+                            <p>{{ item.text_post }}</p>
+                        </div>
+                        <div class="comment">
+                            <div class="comment_p">
+                                <p>Comments:</p>
+                            </div>
+                            <div class="manyperson">
+                                <div class="person">
+                                    <img src="/img/main/15746993c3ca3f4a79f2960819de2c37 1.png" alt="">
+                                    <p style="font-family: 'Montserrat_Black';">hoyleo166:</p>
+                                    <p style="font-family: 'Montserrat';">Love it!</p>
+                                </div>
+                            </div>
+                            <div class="new_comment">
+                                <img src="/img/main/Group 42.png" alt="">
+                                <input type="text" placeholder="Add a comment">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -106,5 +108,20 @@
                 },
             });
         }
+    });
+
+    $('a.like_abc').click(function() {
+        console.log(12)
+        $.ajax({
+            url: '/load_like_post',
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                number_post: $('.right_bar').attr("class")[1]
+            },
+            success: function(data){
+                console.log(data)
+            }
+        })
     });
 </script>

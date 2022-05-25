@@ -1,10 +1,10 @@
 @font-face {
 	font-family: 'Montserrat'; 
-	src: url(/static/font-family/Montserrat-Light.ttf); 
+	src: url(http://127.0.0.1:8000/static/font-family/Montserrat-Light.ttf); 
 }
 @font-face {
 	font-family: 'Montserrat_Black'; 
-	src: url(/static/font-family/Montserrat-Bold.ttf); 
+	src: url(http://127.0.0.1:8000/static/font-family/Montserrat-Bold.ttf); 
 }
 
 body {
