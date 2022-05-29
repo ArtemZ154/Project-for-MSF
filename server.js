@@ -1,22 +1,24 @@
+const cookieParser = require("cookie-parser")
 const express = require("express");
 const session  = require("express-session");
 const sqlite3 = require("sqlite3");
 const app = express()
-    bodyParser = require("body-parser");
-    port = 3080;
+const bodyParser = require("body-parser");
 const urlencodedParser = express.urlencoded({extended: false});
 const redisStorage = require('connect-redis')(session);
 const redis = require('redis');
 const cors = require('cors');
 const { urlencoded } = require("express");
+const abc_login_fds = abc123(100)
 
 const corsOptions ={
-    origin:'*',
-    credentials:true,
-    optionSuccessStatus:200
+    origin:'http://localhost:8080 ',
+    credentials: true,
+    optionSuccessStatus: 200,
+    exposedHeaders: ['set-cookie']
  }
  
- app.use(cors(corsOptions))
+app.use(cors(corsOptions))
 
 const client = redis.createClient({
     legacyMode: true,
@@ -34,7 +36,9 @@ client.on('connect', function (err) {
 
 let data = new Date()
 
+app.use(cookieParser());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true}))
 app.use(express.static(__dirname + '/static'));
 app.use(express.static(__dirname + '/templates'));
 app.use(express.static(__dirname + '/post_photo'));
@@ -44,6 +48,12 @@ app.use(
         store: new redisStorage({
             client: client
         }),
+        cookie: {
+            maxAge: 600000,
+            secure: true,
+            sameSite: "lax",
+        },
+        proxy: true,
         resave: true,
         saveUninitialized: true
     })
@@ -340,7 +350,8 @@ app.post('/login_s', urlencodedParser, function(req, res) {
         getdata('check_log', indata).then(function(data) {
             if (data == true) {
                 req.session["user"] = login;
-                req.session["login"] = abc123(100);
+                req.session["login"] = abc_login_fds;
+                res.cookie('sid_user', abc_login_fds);
                 res.send(true)
             } else {
                 res.send(false)
@@ -401,8 +412,10 @@ app.post("/log_reg_photo", urlencodedParser, function (req, res) {
 
 app.post("/check_ses", urlencodedParser, function (req, res) {
     if (req.session.login == undefined) {
+        console.log(false)
         res.send(false)
     } else {
+        console.log(true)
         res.send(true)
     }
 });
