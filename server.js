@@ -6,19 +6,27 @@ const app = express()
 const bodyParser = require("body-parser");
 const urlencodedParser = express.urlencoded({extended: false});
 const redisStorage = require('connect-redis')(session);
+const multer  = require("multer");
 const redis = require('redis');
 const cors = require('cors');
 const { urlencoded } = require("express");
-const abc_login_fds = abc123(100)
+const { application } = require("express");
+var abc_login_fds = '';
+var abc_user_fds = ''
+app.use(function(req, res, next) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    next();
+});
 
 const corsOptions ={
-    origin:'http://localhost:8080',
+    origin: ['http://localhost:8080', 'http://127.0.0.1:8080'],
     credentials: true,
     optionSuccessStatus: 200,
-    exposedHeaders: ['set-cookie']
+    exposedHeaders: ['set-cookie', 'Access-Control-Allow-Origin']
  }
-
-app.use(cors(corsOptions))
 
 const client = redis.createClient({
     legacyMode: true,
@@ -27,6 +35,7 @@ const client = redis.createClient({
 });
 client.connect()
 
+
 client.on('error', function (err) {
     console.log('Не удалось установить соединение с redis. ' + err);
 });
@@ -34,24 +43,50 @@ client.on('connect', function (err) {
     console.log('Успешно подключен к redis');
 });
 
-app.use(cookieParser());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}))
+const storageConfig = multer.diskStorage({
+    destination: (req, file, cb) =>{
+        cb(null, "post_photo/post");
+    },
+    filename: (req, file, cb) =>{
+        cb(null, (new Date()).getFullYear() + '_' + (new Date()).getMonth() + '_' + (new Date()).getDay() + '_' + (new Date()).getHours() + '_' + file.originalname);
+    }
+});
+    
+
+app.use(multer({storage:storageConfig}).single("photo_file"));
 app.use(express.static(__dirname + '/static'));
 app.use(express.static(__dirname + '/templates'));
 app.use(express.static(__dirname + '/post_photo'));
 app.use(
     session({
-        secret: 'dfsalmlkdsmf',
+        secret: 'dskflsssmfcccccdlmf',
         store: new redisStorage({
             client: client
         }),
-        proxy: true,
+        cookie: {
+            secure: true,
+            sameSite: "none",
+            httpOnly: true
+        },
+        saveUninitialized: true,
         resave: true,
-        saveUninitialized: true
+        rolling: true,
     })
 );
 
+app.use(cors(corsOptions))
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}))
+
+function dict_reverse(obj) {
+    new_obj= {}
+    rev_obj = Object.keys(obj).reverse();
+    rev_obj.forEach(function(i) { 
+      new_obj[i] = obj[i];
+    })
+    return new_obj;
+}
 
 function abc123(a) {
     var abc = "1234567890abcdefghijklmnopqrstuvwxyz";
@@ -110,6 +145,16 @@ async function post_for_lenta(len_data, a) {
             });
             fs = '/avatar/' + prom[0]['avatar']
             data1[String(i)][j]['avatar'] = fs;
+            prom = await new Promise(function(res, rej) {
+                getdata('check_like', {like_from: abc_user_fds, number_post: data1[0][j]['number_post']}).then(function(data) {
+                    res(data)
+                });
+            });
+            data1[String(i)][j]['setting_like'] = prom;
+            if (String(data1[String(i)][j]['setting_like']) == 'true') {
+                data1[String(i)][j]['like_post'] += 1
+            }
+            
         };
     };
     return data1;
@@ -119,7 +164,7 @@ async function getdata (typeq, dataq) {
     let bd = new sqlite3.Database('instagram.db');
     all_types = {
         add_profile: 'INSERT INTO man (login, password, e_mail, phone, name_surname) VALUES (?, ?, ?, ?, ?)',
-        create_post: 'INSERT INTO post (number_post, login, text_post, photo_post, date_post) VALUES (?, ?, ?, ?, ?)',
+        create_post: 'INSERT INTO post (number_post, login, text_post, photo_post) VALUES (?, ?, ?, ?)',
         load_likepost: `INSERT INTO like (number_post, like_from, id_like) VALUES (?, ?, ?)`,
         create_comments: 'INSERT INTO comments (number_post, comm_text, comm_from, id_comm) VALUES (?, ?, ?, ?)',
         load_post: `SELECT * FROM post WHERE number_post = "${dataq.number_post}"`,
@@ -137,9 +182,21 @@ async function getdata (typeq, dataq) {
         subscribe_check: `SELECT * FROM subscribers WHERE from_sub = "${dataq.from_sub}" AND to_sub = "${dataq.to_sub}"`,
         subscribe_del: `DELETE FROM subscribers WHERE from_sub = "${dataq.from_sub}" AND to_sub = "${dataq.to_sub}"`,
         all_sub_user: `SELECT to_sub FROM subscribers WHERE from_sub = "${dataq.user_p}"`,
-        all_post_user: `SELECT * FROM post WHERE login IN ${dataq.login}`,
+        all_post_user: `SELECT * FROM post WHERE login IN ${dataq.login} ORDER BY number DESC`,
         check_all_like_post: `SELECT COUNT(*) FROM like WHERE number_post = "${dataq.number_post}"`,
-        sel_ava: `SELECT avatar FROM man WHERE login = "${dataq.login}"`
+        sel_ava: `SELECT avatar FROM man WHERE login = "${dataq.login}"`,
+        personalpage_up: `SELECT avatar FROM man WHERE login = "${dataq.login}" `,
+        podpischiki: `SELECT COUNT(*) FROM subscribers WHERE to_sub = "${dataq.login}"`,
+        posts: `SELECT COUNT(*) FROM post WHERE login = "${dataq.login}" ORDER BY number DESC`,
+        about_me_s: `SELECT about_me FROM user_setting WHERE user = "${dataq.login}"`,
+        page_pers_post: `SELECT photo_post FROM post WHERE login = "${dataq.login}" ORDER BY number DESC`,
+        save_settings: `UPDATE man SET ${dataq.str}WHERE login = "${dataq.login}"`,
+        getsetts: `SELECT * FROM man WHERE login = "${dataq.login}"`,
+        save_post: `UPDATE post SET login = "${dataq.login_new}" WHERE login = "${dataq.login}"`,
+        save_sub_f: `UPDATE subscribers SET from_sub = "${dataq.login_new}" WHERE from_sub = "${dataq.login}"`,
+        save_sub_t: `UPDATE subscribers SET to_sub = "${dataq.login_new}" WHERE to_sub = "${dataq.login}"`,
+        setting_a: `UPDATE user_setting SET user = "${dataq.login_new}" WHERE user = "${dataq.login}"`,
+        setting_me: `UPDATE user_setting SET about_me = "${dataq.login_new}" WHERE user = "${dataq.login}"`
     };
     
     if (typeq == 'add_profile') {
@@ -147,6 +204,9 @@ async function getdata (typeq, dataq) {
             bd.run(all_types[typeq], [dataq.login, dataq.password, dataq.e_mail, dataq.phone, dataq.name_surname], function (err) {
                 if (err) {
                     console.log(err.message);
+                    res(false)
+                } else {
+                    res(true)
                 };
             });
         });
@@ -207,7 +267,9 @@ async function getdata (typeq, dataq) {
                         bd.run(all_types['subscribe_bd'], [dataq.sub_id, dataq.from_sub, dataq.to_sub], function (err) {
                             if (err) {
                                 console.log(err);
-                            };
+                            } else {
+                                res(true)
+                            }
                         });
                     });
                 } else {
@@ -215,7 +277,9 @@ async function getdata (typeq, dataq) {
                         bd.run(all_types['subscribe_del'], function (err) {
                             if (err) {
                                 console.log(err);
-                            };
+                            } else {
+                                res(true)
+                            }
                         });
                     });
                 }
@@ -314,23 +378,414 @@ async function getdata (typeq, dataq) {
                         bd.run(all_types['load_likepost'], [dataq.number_post, dataq.like_from, dataq.id_like], function(err) {
                             if (err) {
                                 console.log(err);
-                            };
+                            } else {
+                                res(true)
+                            }
                         });
                     });
+                    res(prom_d)
                 } else {
                     let prom_d = new Promise(function(res, rej){
                         bd.run(all_types['del_like'], function(err) {
                             if(err) {
                                 console.log(err);        
+                            } else {
+                                res(false)
                             }
                         });
                     });
+                    res(prom_d)
                 };
+                
             });
         });
         return prom_s
-    };
+    } else if (typeq == 'personalpage_up') {
+        let prom = new Promise (function(res, rej) {
+            bd.all(all_types[typeq], function(err, rows) {
+                if (err) {
+                    rej(err.message);
+                } else {
+                    res(rows);
+                }
+            });
+        });
+        return prom;
+    } else if (typeq == 'podpischiki') {
+        let prom = new Promise (function(res, rej) {
+            bd.all(all_types[typeq], function(err, rows) {
+                if (err) {
+                    rej(err.message);
+                } else {
+                    res(rows);
+                }
+            });
+        });
+        return prom;
+    } else if (typeq == 'posts') {
+        let prom = new Promise (function(res, rej) {
+            bd.all(all_types[typeq], function(err, rows) {
+                if (err) {
+                    rej(err.message);
+                } else {
+                    res(rows);
+                }
+            });
+        });
+        return prom;
+    } else if (typeq == 'about_me_s') {
+        let prom = new Promise (function(res, rej) {
+            bd.all(all_types[typeq], function(err, rows) {
+                if (err) {
+                    rej(err.message);
+                } else {
+                    res(rows);
+                }
+            });
+        });
+        return prom;
+    } else if (typeq == 'page_pers_post') {
+        let prom = new Promise (function(res, rej) {
+            bd.all(all_types[typeq], function(err, rows) {
+                if (err) {
+                    rej(err.message);
+                } else {
+                    res(rows);
+                }
+            });
+        });
+        return prom;
+    } else if (typeq == 'subscribe_check') {
+        let prom = new Promise (function(res, rej) {
+            bd.all(all_types[typeq], function(err, rows) {
+                if (rows.length == 0) {
+                    res(false)
+                } else if (err) {
+                    rej(err);
+                } else {
+                    res(true);
+                };
+            });
+        });
+        return prom;
+    } else if (typeq == 'check_like') {
+        let prom = new Promise (function(res, rej) {
+            bd.all(all_types[typeq], function(err, rows) {
+                if (rows.length == 0) {
+                    res(false)
+                } else if (err) {
+                    rej(err);
+                } else {
+                    res(true);
+                };
+            });
+        });
+        return prom;
+    } else if (typeq == 'getsetts') {
+        let prom = new Promise (function(res, rej) {
+            bd.all(all_types[typeq], function(err, rows) {
+                if (err) {
+                    console.log(err)
+                    rej(err);
+                } else {
+                    res(rows);
+                };
+            });
+        }); 
+        return prom;
+    } else if (typeq == 'save_settings') {
+        let prom = new Promise (function(res, rej) {
+            bd.run(all_types[typeq], function(err) {
+                if (err) {
+                    console.log(err.message);
+                    res(false)
+                } else {
+                    res(true)
+                }
+            });
+        });
+        return prom;
+    } else if (typeq == 'save_post') {
+        let prom = new Promise (function(res, rej) {
+            bd.run(all_types[typeq], function(err) {
+                if (err) {
+                    console.log(err.message);
+                    res(false)
+                } else {
+                    res(true)
+                }
+            });
+        });
+        return prom;
+    } else if (typeq == 'save_sub_f') {
+        let prom = new Promise (function(res, rej) {
+            bd.run(all_types[typeq], function(err) {
+                if (err) {
+                    console.log(err.message);
+                    res(false)
+                } else {
+                    res(true)
+                }
+            });
+        });
+        return prom;
+    } else if (typeq == 'save_sub_t') {
+        let prom = new Promise (function(res, rej) {
+            bd.run(all_types[typeq], function(err) {
+                if (err) {
+                    console.log(err.message);
+                    res(false)
+                } else {
+                    res(true)
+                }
+            });
+        });
+        return prom;
+    } else if (typeq == 'setting_a') {
+        let prom = new Promise (function(res, rej) {
+            bd.run(all_types[typeq], function(err) {
+                if (err) {
+                    console.log(err.message);
+                    res(false)
+                } else {
+                    res(true)
+                }
+            });
+        });
+        return prom;
+    } else if (typeq == 'setting_me') {
+        let prom = new Promise (function(res, rej) {
+            bd.run(all_types[typeq], function(err) {
+                if (err) {
+                    console.log(err.message);
+                    res(false)
+                } else {
+                    res(true)
+                }
+            });
+        });
+        return prom;
+    }
 };
+
+app.post('/settget', urlencodedParser, function(req, res) {
+    let indata = {
+        login: req.body.login
+    };
+
+    let data12 = {
+        login: req.body.login,
+        name_surname: '',
+        about_me: '',
+        phone: '',
+        email: '',
+        avatar: ''
+    }
+    getdata('getsetts', indata).then(function(data) {
+        data12['name_surname'] = data[0]['name_surname'];
+        data12['email'] = data[0]['e_mail'];
+        data12['phone'] = data[0]['phone'];
+        data12['avatar'] = 'http://127.0.0.1:8000/avatar/' + data[0]['avatar']
+
+    });
+    getdata('about_me_s', indata).then(function(data) {
+        data12['about_me'] = data[0]['about_me'];
+    });
+
+    setTimeout(() => {
+        res.send(data12);
+    }, 200);
+});
+
+app.post('/settup', urlencodedParser, function(req, res) {
+    let indata = {
+        login: req.body.login,
+        phone: req.body.phone,
+        about_me: req.body.about_me,
+        name_surname: req.body.name_surname,
+        email: req.body.email,
+    };
+    a = `login = "${indata.login}" `;
+    b = `phone = "${indata.phone}" `;
+    c = `about_me = "${indata.about_me}" `;
+    d = `name_surname = "${indata.name_surname}" `;
+    e = `e_mail = "${indata.email}" `;
+    itog = '';
+    if (indata.login.length != 0) {
+        if (itog.length != 0) {
+            itog += a
+            if (indata.phone.length != 0 || indata.name_surname.length != 0 || indata.email.length != 0) {
+                itog += ', ';
+            }
+        } else {
+            itog += a;
+            if (indata.phone.length != 0 || indata.name_surname.length != 0 || indata.email.length != 0) {
+                itog += ', ';
+            }
+        }
+        
+    }; 
+    if (indata.phone.length != 0) {
+        if (itog.length == 0) {
+            itog += b
+            if (indata.name_surname.length != 0 || indata.email.length != 0) {
+                itog += ', ';
+            }
+        } else {
+            itog += b;
+            if (indata.name_surname.length != 0 || indata.email.length != 0) {
+                itog += ', ';
+            }
+        }
+    }; 
+    if (indata.name_surname.length != 0) {
+        if (itog.length == 0) {
+            itog += d
+            if (indata.email.length != 0) {
+                itog += ', ';
+            }
+        } else {
+            itog += d;
+            if (indata.email.length != 0) {
+                itog += ', ';
+            }
+        }
+    }; 
+    if (indata.email.length != 0) {
+        itog += e
+    };
+
+    getdata('save_settings', {str: itog, login: abc_user_fds}).then(function(data) {
+    }) ;
+    if (req.body.login.length != 0){
+        getdata('save_post', {login_new: req.body.login, login: abc_user_fds}).then(function(data) {
+        });
+        getdata('save_sub_f', {login_new: req.body.login, login: abc_user_fds}).then(function(data) {
+        });
+        getdata('save_sub_t', {login_new: req.body.login, login: abc_user_fds}).then(function(data) {
+        });
+        getdata('setting_a', {login_new: req.body.login, login: abc_user_fds, about_me: req.body.about_me}).then(function(data) {
+        });
+        abc_user_fds = req.body.login
+    }
+        
+    if (req.body.about_me.length != 0) {
+        getdata('setting_me', {login_new: req.body.login, login: abc_user_fds, about_me: req.body.about_me}).then(function(data) {
+        });
+    }
+    
+});
+
+app.post('/personalpage', urlencodedParser, function(req, res) {
+    console.log(req.body.login)
+    console.log(req.body.login_from)
+    let indata = {
+        login: (req.body.login).slice(9),
+        login_from: req.body.login_from,
+    };
+    if ((req.body.login).slice(9) == abc_user_fds){
+        let a = {
+            up: {
+                login: (req.body.login).slice(9),
+                avatar: '',
+                subscribers: '',
+                settings: 'true'
+            },
+            postss: {
+                
+            }
+        }
+        getdata('personalpage_up', indata).then(function(data){
+            a['up']['avatar'] = 'http://127.0.0.1:8000/avatar/' + data[0]['avatar'];
+        });
+        getdata('podpischiki', indata).then(function(data) {
+            a['up']['subscribers'] = data[0]['COUNT(*)'];
+        });
+        getdata('posts', indata).then(function(data) {
+            a['up']['posts'] = data[0]['COUNT(*)'];
+        });
+        getdata('about_me_s', indata).then(function(data) {
+            a['up']['about_me'] = data[0]['about_me'];
+        });
+        getdata('subscribe_check', {from_sub: req.body.login_from, to_sub: (req.body.login).slice(9)}).then(function(data) {
+            a['up']['settings_sub'] = data
+        });
+        getdata('page_pers_post', indata).then(function(data) {
+            let adsfasa = data.length
+            let len_3 = Math.ceil((data.length) / 3)
+            for (let j = 0; j < len_3; j++) {
+                a['postss'][j] = []
+                if (adsfasa >= 3) {
+                    for (let i = 0; i < 3; i++) {
+                        a['postss'][j].push(data[0]['photo_post']);
+                        data.shift();
+                    };
+                } else if (adsfasa < 3) {
+                    for (let i = 0; i < adsfasa; i++) {
+                        a['postss'][j].push(data[0]['photo_post']);
+                        data.shift();
+                    };
+                }
+                adsfasa -= 3
+            };
+        });
+        setTimeout(() => {
+            console.log(a)
+            res.send(a);
+        }, 200);
+    } else {
+        let a = {
+            up: {
+                login: (req.body.login).slice(9),
+                avatar: '',
+                subscribers: '',
+                settings: 'false'
+            },
+            postss: {
+                
+            }
+        }
+        getdata('personalpage_up', indata).then(function(data){
+            a['up']['avatar'] = 'http://127.0.0.1:8000/avatar/' + data[0]['avatar'];
+        });
+        getdata('podpischiki', indata).then(function(data) {
+            a['up']['subscribers'] = data[0]['COUNT(*)'];
+        });
+        getdata('posts', indata).then(function(data) {
+            a['up']['posts'] = data[0]['COUNT(*)'];
+        });
+        getdata('about_me_s', indata).then(function(data) {
+            a['up']['about_me'] = data[0]['about_me'];
+        });
+        getdata('subscribe_check', {from_sub: req.body.login_from, to_sub: (req.body.login).slice(9)}).then(function(data) {
+            a['up']['settings_sub'] = data
+        });
+        getdata('page_pers_post', indata).then(function(data) {
+            let adsfasa = data.length
+            let len_3 = Math.ceil((data.length) / 3)
+            for (let j = 0; j < len_3; j++) {
+                a['postss'][j] = []
+                if (adsfasa >= 3) {
+                    for (let i = 0; i < 3; i++) {
+                        a['postss'][j].push(data[0]['photo_post']);
+                        data.shift();
+                    };
+                } else if (adsfasa < 3) {
+                    for (let i = 0; i < adsfasa; i++) {
+                        a['postss'][j].push(data[0]['photo_post']);
+                        data.shift();
+                    };
+                }
+                adsfasa -= 3
+            };
+        });
+        setTimeout(() => {
+            console.log(a)
+            res.send(a);
+        }, 200);
+    }
+    
+});
 
 app.post('/login_s', urlencodedParser, function(req, res) {
     login = req.body.login;
@@ -344,8 +799,9 @@ app.post('/login_s', urlencodedParser, function(req, res) {
             if (data == true) {
                 req.session['user'] = indata.login;
                 req.session['login'] = abc123(100);
-                console.log(req.sessionID)
-                res.send(true)
+                abc_user_fds = indata.login
+                abc_login_fds = req.sessionID;
+                res.send([true, req.sessionID])
             } else {
                 res.send(false)
             };            
@@ -353,34 +809,67 @@ app.post('/login_s', urlencodedParser, function(req, res) {
     } else {
         res.send('log_true')
     };
+    
 });
 
 app.post('/lenta_sub', urlencodedParser, function(req, res) {
     let indata = {
-        user_p: req.session['user'],
+        user_p: abc_user_fds,
     };
-    getdata('all_sub_user', indata).then(function(data){
-        len_data = data.length
-        let a = []
-        for (let i = 0; i < data.length; i++) {
-            b = data[i]['to_sub'];
-            a.push(b);
-        }; 
-        post_for_lenta(len_data, a).then(function(data) {
-            res.send(data);
-        });
+    console.log(req.body.user_sid, abc_login_fds)
+    if (req.body.user_sid === abc_login_fds) {
+        getdata('all_sub_user', indata).then(function(data){
+            len_data = data.length
+            let a = []
+            for (let i = 0; i < data.length; i++) {
+                b = data[i]['to_sub'];
+                a.push(b);
+            }; 
+            post_for_lenta(len_data, a).then(function(data) {
+                console.log(data)
+                res.send(data);
+            });
     });
+    } else {
+        res.send(false)
+    }
+    
 });
+
+app.post("/upload_file", urlencodedParser,function (req, res, next) {
+        let filedata = req.file;
+        console.log(req.body);
+        let indata = {
+            login: abc_user_fds,
+            number_post: abc123(50),
+            photo_post: filedata.filename,
+            text_post: req.body.text_post
+        }
+        if (!filedata) {
+            res.redirect(301, 'http://localhost:8080/account/' + abc_user_fds);
+        } else {
+            getdata('create_post', indata).then(function(data) {
+                res.redirect(301, 'http://localhost:8080/account/' + abc_user_fds);
+            });
+        }
+    });    
 
 app.post('/subscribator', urlencodedParser, function(req, res) {
     let indata = {
-        from_sub: req.session['user'],
-        to_sub: req.body.to_sub,
+        from_sub: req.body.login_from,
+        to_sub: (req.body.login).slice(9),
         sub_id: abc123(50)
     }
-    getdata('subscribe_bd', indata).then(function(data) {
-        res.send()
-    })
+    if (req.body.login_from == abc_user_fds) {
+        console.log(123)
+        getdata('subscribe_bd', indata).then(function(data) {
+            res.send(true)
+        });
+        console.log(321)
+        res.send(true)
+    } else {
+        res.send(false)
+    };
 })
 
 app.post("/log_reg_photo", urlencodedParser, function (req, res) {
@@ -404,10 +893,11 @@ app.post("/log_reg_photo", urlencodedParser, function (req, res) {
 });
 
 app.post("/check_ses", urlencodedParser, function (req, res) {
-    if (req.session.login == undefined) {
-        res.send(false)
-    } else {
+    console.log(req.body.user_sid, abc_login_fds)
+    if (req.body.user_sid === abc_login_fds) {
         res.send(true)
+    } else {
+        res.send(false)
     }
 });
 
@@ -425,6 +915,7 @@ app.post("/registration_s", urlencodedParser, function (req, res) {
         name_surname: name_surname,
     };
     getdata('add_profile', indata).then(function(data) {
+        console.log(data)
         res.send(data);
     });
 });
@@ -451,12 +942,10 @@ app.post('/change_password', urlencodedParser, function(req, res) {
 });
 
 app.post('/exit_account', urlencodedParser, function(req, res) {
-    if (req.session.login != undefined) {
-        req.session.destroy();
-        return true;
-    } else {
-        return false;
-    };
+    abc_login_fds= '';
+    abc_user_fds = '';
+    console.log(req.body);
+    return true
 });
 
 app.post('/create_post_s', urlencodedParser, function (req, res) {
@@ -484,7 +973,7 @@ app.post('/create_post_s', urlencodedParser, function (req, res) {
 
 app.post('/load_like_post', urlencodedParser, function(req, res) {
     let indata = {
-        like_from: req.session['user'],
+        like_from: req.body.login,
         number_post: req.body.number_post,
         id_like: abc123(50)
     };
@@ -518,35 +1007,6 @@ app.post('/personal_page_post', urlencodedParser, function(req, res) {
         console.log(data);
         res.send(data)
     });
-});
-
-
-
-app.get("/registration", function (req, res) {
-    res.sendFile('templates/registration123.html', {root: __dirname });
-});
-
-app.get("/login", function(req, res) {
-    res.sendFile('templates/login123.html', {root: __dirname })
-});
-
-app.get("/account/:login", function (req, res) {
-    let login = req.params.login;
-
-    getdata('acc_log', {login: login}).then(function(data){
-        l1 = data[0];
-        l = 'post_photo/avatar/' + l1.avatar;
-        data[0].avatar = l;
-        console.log(data);
-    })
-});
-
-app.get('/', function (req, res) {
-    res.sendFile('templates/main.html', {root: __dirname })
-});
-
-app.get("/test", function(req, res) {
-    res.sendFile('templates/test.html', {root: __dirname })
 });
 
 

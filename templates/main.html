@@ -80,10 +80,22 @@
         </div>
     </main>
 </body>
-
 </html>
 
 <script>
+    $('.right_bar').mousedown(function () {
+        $('.right_bar').css('display', 'none')
+        $('.right_bar').css('width', '100%')
+        $('.right_bar').css('border-radius', '30px 30px 30px 30px')
+    });
+
+    $('.right_bar').mouseup(function () {
+        $('.right_bar').css('display', 'block')
+        $('.right_bar').css('width', '389px')
+        $('.right_bar').css('border-radius', '30px 30px 30px 30px')
+    });
+
+
     $.ajax({
         url: '/check_ses',
         type: 'POST', 
@@ -101,6 +113,7 @@
         dataType: 'json',
         data: {},
         success: function(data){
+            console.log(data)
             let background_registration_img1 = new Vue({
                 el: ".all_card",
                 data: {

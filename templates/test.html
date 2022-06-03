@@ -10,7 +10,7 @@
 </head>
 <body>
     <button class="sub">subscribe</button>
-    <button class="all">pod</button>
+    <button class="all">avatar</button>
 </body>
 </html>
 
@@ -26,7 +26,7 @@
     });
     $('.all').click(function() {
         $.ajax({
-            url: '/lenta_sub',
+            url: '/personalpage',
             type: 'POST',
             dataType: 'text',
             data: {
