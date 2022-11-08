@@ -15,6 +15,10 @@
     <button class="like_post">like post</button>
     <button class="change_password">change password</button>
     <button class="exit_account">exit</button>
+    <button class="favor">fav</button>
+    <button class="gradient">gradient</button>
+    <button class="gradient_f">gradient frame</button>
+    <button class="gradient_n">gradient nickname</button>
 </body>
 </html>
 <script>
@@ -31,7 +35,45 @@
                 return data;
             }
         });
-    }
+    };
+    $('.gradient').click(function() {
+        $.ajax({
+            url: '/sel_gradient',
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                login: 'ArtemZ544'
+            },
+            success: function(data){
+                console.log(data);
+            } 
+        })
+    });$('.favor').click(function() {
+        $.ajax({
+            url: '/favorite_s',
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                login: 'ArtemZ544'
+            },
+            success: function(data){
+                console.log(data);
+            } 
+        })
+    });
+    $('.favor').click(function() {
+        $.ajax({
+            url: '/favorite_s',
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                login: 'ArtemZ544'
+            },
+            success: function(data){
+                console.log(data);
+            } 
+        })
+    });
     $('.enter_login').click(function(){  
         $.ajax({ 
             url: '/login_s',
@@ -93,7 +135,21 @@
         } else {
             console.log('LOGIIIIN!!!')
         }
-    });  
+    }); 
+    $('.gradient_f').click(function(){  
+        $.ajax({ 
+            url: '/change_frame_nick',
+            type: 'POST',
+            dataType: 'text',
+            data: {
+                nfn: 1,
+                frame: 'gfdhfgdfh2ds1gd'
+            },
+            success: function(data){
+                console.log(data);
+            },
+        })
+    });
     $('.enter_reg').click(function(){  
         $.ajax({ 
             url: '/registration_s',

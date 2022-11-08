@@ -1,0 +1,274 @@
+@font-face {
+	font-family: 'Montserrat'; 
+	src: url(/static/font-family/Montserrat-Light.ttf); 
+}
+@font-face {
+	font-family: 'Montserrat_Black'; 
+	src: url(/static/font-family/Montserrat-Bold.ttf); 
+}
+@font-face {
+	font-family: 'Montserrat_BlackExtra'; 
+	src: url(/static/font-family/Montserrat-ExtraBold.ttf); 
+}
+
+@font-face {
+	font-family: 'Montserrat_normal'; 
+	src: url(/static/font-family/Montserrat-SemiBold.ttf); 
+}
+@font-face {
+	font-family: 'Leto'; 
+	src: url(/static/font-family//Leto/Leto\ Text\ Sans\ Defect.otf); 
+}
+
+body {
+    margin: 0;
+    background: rgba(245, 245, 245, 0.85);
+}
+
+header {
+    margin: 0 auto;
+    margin-top: 25px;
+    margin-bottom: 30px;
+    width: 640px;
+    height: 40px;
+}
+
+.icon {
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.iconleft {
+    width: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.iconleft button {
+    background: rgba(245, 245, 245, 0.85);
+    border: none;
+}
+
+.iconright button {
+    background: rgba(245, 245, 245, 0.85);
+    border: none;
+}
+
+.logo {
+    width: 200px;
+    height: 40px;
+    background: #FFFFFF;
+    border: 1px solid #000000;
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    margin-left: 63px;
+}
+
+.logo p {
+    margin: 0 auto;
+    color: black;
+    font-family: 'Montserrat_Black';
+    font-size: 15px;
+}
+
+.iconright {
+    width: 124px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+main {
+    margin: 0 auto;
+    width: 640px;
+    height: 100%;
+    box-shadow: 0px 10px 50px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 30px;
+    margin-bottom: 16px;
+}
+
+.many_saitbar {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 10px;
+}
+
+.left_saitbar {
+    width: 167px;
+    height: 100%;
+}
+
+.polosa {
+    width: 1px;
+    background-color: #D9D9D9;
+}
+
+.right_saitbar {
+    width: 472px;
+    height: 100%;
+}
+
+.header {
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+
+.header p{
+    font-family: "Montserrat_BlackExtra";
+    font-size: 20px;
+    color: #000000;
+    padding: 20px 5px 0px 20px;
+    margin: 0px;
+}
+
+.header img {
+    padding-top: 20px;
+    width: 15px;
+    height: 15px;
+}
+
+.categ {
+    width: 132px;
+    height: 100%;
+    margin: 15px 0px 0px 36px;
+}
+
+.edit_profile {
+    font-family: 'Montserrat_normal'; 
+    font-size: 17px;
+    color: #000000;
+    border: none;
+    background: none;
+    border-bottom: 1px solid #000;
+    padding: 0px;
+}
+
+ul {
+    padding: 0px;
+    margin: 0px;
+}
+
+li {
+    list-style-type: none;
+}
+
+.person_info img {
+    width: 32px;
+    height: 32px;
+}
+
+
+.div_person_logo{
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: radial-gradient(#FF6868 90%, #FFC700 90%,#FF0099 90%,#FF7A00 90%);
+    display: flex;
+    align-items: center;
+}
+
+.person_logo {
+    width: 85px;
+    height: 85px;
+    align-items: center;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: radial-gradient(#FF6868, #FFC700,#FF0099,#FF7A00);
+}
+
+
+.person_info {
+    display: flex;
+    margin: 36px 0px 0px 51px; 
+}
+
+.div_person_p {
+    padding-left: 10px;
+}
+
+.div_person_p p {
+    margin: 0px;
+}
+
+#one {
+    font-family: "Leto";
+    font-size: 15px;
+    background: linear-gradient(180deg, #FF0000 0%, #FF0000 0.01%, #EBFF00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding-top: 6px;
+    height: 17px;
+}
+
+#two {
+    font-family: "Leto";
+    font-size: 9px;
+    color: #A6A6A6;
+}
+
+.config_person {
+    padding-left: 51px;
+    padding-top: 15px;
+}
+
+.config_person h4{
+    margin: 0px;
+    font-family: "Montserrat_BlackExtra";
+    font-size: 13px;
+    color: #000000;
+}
+
+.config_person p{
+    padding-top: 2px;
+    margin: 0px;
+    font-family: "Montserrat_normal";
+    font-size: 9px;
+    color: #000000;
+    width: 310px;
+    height: 33px;
+}
+
+.input_req {
+    margin-left: 161px;
+    margin-top: 22px;
+    margin-bottom: 15px;
+}
+
+#div_input {
+    padding-bottom: 10px;
+}
+
+.p_any {
+    font-family: "Leto";
+    font-size: 11px;
+    color: #A6A6A6;
+    margin: 0px;
+    padding: 0px;
+}
+
+.input_any {
+    width: 200px;
+    height: 30px;
+    background: #FFFFFF;
+    border: 1px solid #000000;
+    border-radius: 10px;
+}
+
+.btn_preset button {
+    font-family: "Montserrat_normal";
+    width: 90px;
+    height: 25px;
+    background: #FF4848;
+    border: none;
+    border-radius: 10px;
+    font-size: 11px;
+    color: #FFFFFF;
+}
+
+

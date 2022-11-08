@@ -1,0 +1,148 @@
+@font-face {
+	font-family: 'Montserrat'; 
+	src: url(/static/font-family/Montserrat-Light.ttf); 
+}
+@font-face {
+	font-family: 'Montserrat_Black'; 
+	src: url(/static/font-family/Montserrat-Bold.ttf); 
+}
+@font-face {
+	font-family: 'Montserrat_BlackExtra'; 
+	src: url(/static/font-family/Montserrat-ExtraBold.ttf); 
+}
+
+@font-face {
+	font-family: 'Montserrat_normal'; 
+	src: url(/static/font-family/Montserrat-SemiBold.ttf); 
+}
+@font-face {
+	font-family: 'Leto'; 
+	src: url(/static/font-family//Leto/Leto\ Text\ Sans\ Defect.otf); 
+}
+
+body {
+    margin: 0;
+    background: rgba(245, 245, 245, 0.85);
+}
+
+header {
+    margin: 0 auto;
+    margin-top: 25px;
+    margin-bottom: 30px;
+    width: 640px;
+    height: 40px;
+}
+
+.icon {
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.iconleft {
+    width: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.iconleft button {
+    background: rgba(245, 245, 245, 0.85);
+    border: none;
+}
+
+.iconright button {
+    background: rgba(245, 245, 245, 0.85);
+    border: none;
+}
+
+.logo {
+    width: 200px;
+    height: 40px;
+    background: #FFFFFF;
+    border: 1px solid #000000;
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    margin-left: 63px;
+}
+
+.logo p {
+    margin: 0 auto;
+    color: black;
+    font-family: 'Montserrat_Black';
+    font-size: 15px;
+}
+
+.iconright {
+    width: 124px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+main {
+    width: 860px;
+    height: 764px;
+    background: #FFFFFF;
+    box-shadow: 0px 10px 50px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 30px;
+    margin: 0 auto;
+    padding: 20px 10px 13px 20px;
+}
+
+.left_bar {
+    width: 182px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+}
+
+.header #one {
+    padding: 0px;
+    margin: 0px;
+    font-family: 'Montserrat_normal';
+    font-size: 20px;
+    color: #000000;
+    margin-right: 10px;
+}
+
+.new_mes {
+    width: 40px;
+    height: 20px;
+    background: #FF4848;
+    border-radius: 5px;
+    align-items: center;
+    display: flex;
+}
+
+.new_mes #two {
+    padding: 0px;
+    margin: 0;
+    font-family: 'Montserrat_normal';
+    font-size: 9px;
+    color: #FFFFFF;
+    text-align: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.nav_direct {
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+.nav_direct button {
+    width: 56px;
+    height: 30px;
+    background: #FFFFFF;
+    border-radius: 5px;
+    border: none;
+    font-family: 'Montserrat_normal';
+    font-size: 10px;
+    color: #000000;
+}
+

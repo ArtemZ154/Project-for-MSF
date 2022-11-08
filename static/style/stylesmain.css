@@ -68,14 +68,7 @@ header {
     margin-bottom: 20px;
 }
 
-.left_bar {
-    overflow: hidden;
-    position: relative;
-    z-index: 0;
-    display: flex;
-    align-items: center;
-    margin: 0 auto;
-}
+
 
 .left_bar img {
     margin: 0 auto;
@@ -115,12 +108,6 @@ header {
     height: 100%;
 }
 
-.like img {
-    margin-right: 18px;
-    cursor: pointer;
-    z-index: 100000;
-}
-
 .left_button p{
     font-family: 'Montserrat_Black';
     font-size: 9px;
@@ -129,16 +116,7 @@ header {
     margin-top: 2px;
 }
 
-.right_bar {
-    position: relative;
-    z-index: 1;    
-    width: 251px;
-    height: 389px;
-}
 
-.like {
-    z-index: 10000;
-}
 
 .right_button button {
     font-family: 'Montserrat_Black';
@@ -160,8 +138,7 @@ header {
 .account img{
     width: 40px;
     height: 40px;
-    margin-right: 15px;
-    border-radius: 100%;
+    padding-right: 15px;
 }
 
 .account p{
@@ -259,4 +236,27 @@ header {
     margin-right: 15px;
     border: 1px solid #FF4848;
     border-radius: 38px;
+}
+
+.left_bar {
+    overflow: hidden;
+    position: relative;
+    z-index: 0;
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.right_bar {
+    position: relative;
+    z-index: 1;    
+    width: 251px;
+    height: 389px;
+    transition-duration: 0.5s;
+    opacity: 1;
+}
+
+.right_bar:active {
+    opacity: 0;
+    width: 0%;
 }
